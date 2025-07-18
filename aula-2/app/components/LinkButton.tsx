@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link";
 
 interface BotaoLinkProps {
@@ -12,7 +14,7 @@ const cores = {
   purple: "bg-purple-500 hover:bg-purple-600",
 };
 
-export default function Button({ href, children, cor = "blue" }: BotaoLinkProps) {
+export default function LinkButton({ href, children, cor = "blue" }: BotaoLinkProps) {
   return (
     <Link
       href={href}

@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Sugestao {
+  id         Int       @id @default(autoincrement())
+  tipo       TipoSugestao
+  nome       String
+  descricao  String?       // opcional para explicações
+  criadaEm   DateTime      @default(now())
+}
+
+enum TipoSugestao {
+  ARTISTA
+  MUSICA
+  PLAYLIST
+}

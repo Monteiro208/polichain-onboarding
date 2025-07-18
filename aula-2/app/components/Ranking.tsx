@@ -1,3 +1,5 @@
+'use client';
+
 type Item = {
   nome: string;
   imagem: string;

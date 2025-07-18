@@ -1,3 +1,5 @@
+'use client';
+
 import Ranking from "../components/Ranking";
 
 export default function Artistas() {
