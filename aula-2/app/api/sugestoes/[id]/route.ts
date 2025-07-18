@@ -1,49 +1,60 @@
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
 import { TipoSugestao } from "@prisma/client";
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  const id = Number(params.id);
+
+export async function DELETE(request: NextRequest) {
+  const { pathname } = new URL(request.url);
+  const idStr = pathname.split("/").pop();
+  const id = Number(idStr);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID inválido." }, { status: 400 });
+  }
+
+  await prisma.sugestao.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({ message: "Sugestão deletada com sucesso." });
+}
+
+
+export async function PATCH(request: NextRequest) {
+  const { pathname } = new URL(request.url);
+  const idStr = pathname.split("/").pop();
+  const id = Number(idStr);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID inválido." }, { status: 400 });
+  }
+
   const body = await request.json();
   const { tipo, nome, descricao } = body;
 
-  
-  const dataAtualizacao: any = {};
-  if (tipo) {
-    const tipoFormatado = tipo.toUpperCase();
-    if (!Object.values(TipoSugestao).includes(tipoFormatado as TipoSugestao)) {
-      return NextResponse.json(
-        { error: `Tipo inválido: ${tipo}. Valores esperados: ${Object.values(TipoSugestao).join(", ")}` },
-        { status: 400 }
-      );
-    }
-    dataAtualizacao.tipo = tipoFormatado;
+  if (!tipo || !nome) {
+    return NextResponse.json(
+      { error: "Campos obrigatórios ausentes." },
+      { status: 400 }
+    );
   }
 
-  if (nome) dataAtualizacao.nome = nome;
-  if (descricao !== undefined) dataAtualizacao.descricao = descricao;
-
-  try {
-    const sugestaoAtualizada = await prisma.sugestao.update({
-      where: { id },
-      data: dataAtualizacao,
-    });
-
-    return NextResponse.json(sugestaoAtualizada);
-  } catch (error) {
-    console.error("Erro ao atualizar sugestão:", error);
-    return NextResponse.json({ error: "Erro ao atualizar sugestão." }, { status: 500 });
+  const tipoFormatado = tipo.toUpperCase();
+  if (!Object.values(TipoSugestao).includes(tipoFormatado as TipoSugestao)) {
+    return NextResponse.json(
+      { error: `Tipo inválido: ${tipo}. Valores esperados: ${Object.values(TipoSugestao).join(", ")}` },
+      { status: 400 }
+    );
   }
-}
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  const id = Number(params.id);
+  const sugestaoAtualizada = await prisma.sugestao.update({
+    where: { id },
+    data: {
+      tipo: tipoFormatado as TipoSugestao,
+      nome,
+      descricao,
+    },
+  });
 
-  try {
-    await prisma.sugestao.delete({ where: { id } });
-    return NextResponse.json({ message: "Sugestão deletada com sucesso." });
-  } catch (error) {
-    console.error("Erro ao deletar sugestão:", error);
-    return NextResponse.json({ error: "Erro ao deletar sugestão." }, { status: 500 });
-  }
+  return NextResponse.json(sugestaoAtualizada);
 }
